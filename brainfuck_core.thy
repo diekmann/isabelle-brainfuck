@@ -69,7 +69,7 @@ value "print_state (eval_basic [D, R, P, D, R, P, P, D, R, P, P, P, D, L, L, L] 
 
 inductive eval :: "bf_cmd list \<Rightarrow> state \<Rightarrow> nat \<Rightarrow> state \<Rightarrow> bool" for cmd and s where
   "s = s' \<Longrightarrow> pc = 0 \<Longrightarrow> eval cmd s pc s'" |
-  "pc' = pc + 1 \<Longrightarrow> cmd ! pc =  Basic cb \<Longrightarrow> eval cmd s pc s' \<Longrightarrow> (eval_basic cb s') = s'' \<Longrightarrow> eval cmd s pc' s''" 
+  "eval cmd s pc s' \<Longrightarrow> pc + 1 = pc' \<Longrightarrow> cmd ! pc =  Basic cb \<Longrightarrow> (eval_basic cb s') = s'' \<Longrightarrow> eval cmd s pc' s''" 
   (*TODO control flow*)
 
 
@@ -77,29 +77,18 @@ lemma "eval [] (Normal (Tape [] 0 []) inp outp) 0 (Normal (Tape [] 0 []) inp out
   by(simp add: eval.intros)
 
 lemma "eval [Basic [P, D]] (Normal (Tape [] 0 []) inp (Outp [])) 1 (Normal (Tape [] 1 []) inp (Outp [1]))"
-  (*apply(auto intro: eval.intros)*)
-     apply(rule eval.intros(2))
-    apply(simp)
-   apply(simp)
-    apply(rule eval.intros(1))
-   apply(simp)
-  apply(simp)
- apply(simp)
+  apply(auto intro: eval.intros)
  done
 
 
 lemma "eval [Basic [P, D], Basic [P, P, P, D]] (Normal (Tape [] 0 []) inp (Outp [])) 2 (Normal (Tape [] 4 []) inp (Outp [4,1]))"
-     apply(rule eval.intros(2))
-    apply(simp)
-   apply(simp)
-     apply(rule eval.intros(2))
-    apply(simp)
-   apply(simp)
+    apply(rule eval.intros(2))
+    apply(simp_all)
+    apply(rule eval.intros(2))
+    apply(simp_all)
     apply(rule eval.intros(1))
-   apply(simp)
-  apply(simp)
- apply(simp)
-apply(simp)
+    apply(simp_all)
+    apply(simp)
 done
 
 
