@@ -67,24 +67,46 @@ fun eval_basic :: "bf_cmd_basic list \<Rightarrow> state \<Rightarrow> state" wh
 value "print_state (eval_basic [D, R, P, D, R, P, P, D, R, P, P, P, D, L, L, L] (Normal (Tape [] 0 []) (Inp []) (Outp [])))"
 
 
-inductive eval :: "bf_cmd list \<Rightarrow> nat \<Rightarrow> state \<Rightarrow> state \<Rightarrow> bool" for cmd where
-  "s = s' \<Longrightarrow> pc = 0 \<Longrightarrow> eval cmd pc s s'" |
-  "cmd ! pc =  Basic cb \<Longrightarrow> eval cmd pc s s' \<Longrightarrow> (eval_basic cb s') = s'' \<Longrightarrow> eval cmd pc s s''" 
+inductive eval :: "bf_cmd list \<Rightarrow> state \<Rightarrow> nat \<Rightarrow> state \<Rightarrow> bool" for cmd and s where
+  "s = s' \<Longrightarrow> pc = 0 \<Longrightarrow> eval cmd s pc s'" |
+  "pc' = pc + 1 \<Longrightarrow> cmd ! pc =  Basic cb \<Longrightarrow> eval cmd s pc s' \<Longrightarrow> (eval_basic cb s') = s'' \<Longrightarrow> eval cmd s pc' s''" 
   (*TODO control flow*)
 
 
-lemma "eval [] 0 (Normal (Tape [] 0 []) inp outp) (Normal (Tape [] 0 []) inp outp)"
+lemma "eval [] (Normal (Tape [] 0 []) inp outp) 0 (Normal (Tape [] 0 []) inp outp)"
   by(simp add: eval.intros)
 
-lemma "eval [Basic [P, D]] 0 (Normal (Tape [] 0 []) inp (Outp [])) (Normal (Tape [] 1 []) inp (Outp [1]))"
+lemma "eval [Basic [P, D]] (Normal (Tape [] 0 []) inp (Outp [])) 1 (Normal (Tape [] 1 []) inp (Outp [1]))"
   (*apply(auto intro: eval.intros)*)
      apply(rule eval.intros(2))
     apply(simp)
-     apply(rule eval.intros(1))
-    apply(simp)
+   apply(simp)
+    apply(rule eval.intros(1))
    apply(simp)
   apply(simp)
-  done
+ apply(simp)
+ done
+
+
+lemma "eval [Basic [P, D], Basic [P, P, P, D]] (Normal (Tape [] 0 []) inp (Outp [])) 2 (Normal (Tape [] 4 []) inp (Outp [4,1]))"
+     apply(rule eval.intros(2))
+    apply(simp)
+   apply(simp)
+     apply(rule eval.intros(2))
+    apply(simp)
+   apply(simp)
+    apply(rule eval.intros(1))
+   apply(simp)
+  apply(simp)
+ apply(simp)
+apply(simp)
+done
+
+
+code_pred eval .
+
+value[code] "eval [Basic [P, D], Basic [P, P, P, D]] 
+  (Normal (Tape [] 0 []) (Inp []) (Outp [])) 2 (Normal (Tape [] 4 []) (Inp []) (Outp [4,1]))"
 
 
 end
