@@ -8,8 +8,8 @@ type_synonym byte = "8 word"
 lemma "(256 :: byte) = 0" by simp
 
 
-datatype bf_cmd_basic = R  --"<, increment the data pointer (to point to the next cell to the right)." 
-                | L  --">, decrement the data pointer (to point to the next cell to the left)."
+datatype bf_cmd_basic = R  --">, increment the data pointer (to point to the next cell to the right)." 
+                | L  --"<, decrement the data pointer (to point to the next cell to the left)."
                 | P  --"+, increment the byte at the data pointer."
                 | M  --"-, decrement the byte at the data pointer."
                 | D  --"., output the byte at the data pointer."
@@ -69,7 +69,7 @@ value "print_state (eval_basic [D, R, P, D, R, P, P, D, R, P, P, P, D, L, L, L] 
 
 inductive eval :: "bf_cmd list \<Rightarrow> state \<Rightarrow> nat \<Rightarrow> state \<Rightarrow> bool" for cmd and s where
   "s = s' \<Longrightarrow> pc = 0 \<Longrightarrow> eval cmd s pc s'" |
-  "eval cmd s pc s' \<Longrightarrow> pc + 1 = pc' \<Longrightarrow> cmd ! pc =  Basic cb \<Longrightarrow> (eval_basic cb s') = s'' \<Longrightarrow> eval cmd s pc' s''" 
+  "eval cmd s pc s' \<Longrightarrow> pc' = pc +1 \<Longrightarrow> cmd ! pc =  Basic cb \<Longrightarrow> s'' = (eval_basic cb s') \<Longrightarrow> eval cmd s pc' s''" 
   (*TODO control flow*)
 
 
